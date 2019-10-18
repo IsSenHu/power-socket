@@ -1,6 +1,5 @@
-package com.cdsen.powersocket.module.connection.message;
+package com.cdsen.powersocket.message;
 
-import com.cdsen.powersocket.websocket.MessageError;
 import lombok.Getter;
 
 /**

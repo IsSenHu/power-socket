@@ -2,7 +2,8 @@ package com.cdsen.powersocket.websocket;
 
 import com.cdsen.apollo.AppProperties;
 import com.cdsen.apollo.ConfigUtils;
-import com.cdsen.powersocket.module.connection.message.ConnectionError;
+import com.cdsen.powersocket.message.ConnectionError;
+import com.cdsen.powersocket.message.MessageResult;
 import com.cdsen.security.util.JwtParseUtils;
 import com.cdsen.user.UserLoginInfo;
 import com.cdsen.user.UserManager;
@@ -106,6 +107,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     if (!loginInfo.isAccountNonLocked()) {
                         return new GenericMessage<>(MessageResult.of(ConnectionError.CAN_NOT_ACCESS));
                     }
+
+                    accessor.setUser(() -> username);
                 }
                 return message;
             }

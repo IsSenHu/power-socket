@@ -1,4 +1,4 @@
-package com.cdsen.powersocket.websocket;
+package com.cdsen.powersocket.message;
 
 /**
  * @author HuSen
