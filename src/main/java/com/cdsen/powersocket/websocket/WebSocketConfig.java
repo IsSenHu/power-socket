@@ -108,7 +108,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         return new GenericMessage<>(MessageResult.of(ConnectionError.CAN_NOT_ACCESS));
                     }
 
-                    accessor.setUser(() -> username);
+                    accessor.setUser(() -> loginInfo.getUserId().toString());
                 }
                 return message;
             }
