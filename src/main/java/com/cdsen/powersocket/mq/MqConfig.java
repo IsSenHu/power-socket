@@ -19,7 +19,7 @@ import static com.cdsen.apollo.AppProperties.Rabbitmq.RABBITMQ_NAMESPACE;
  * create on 2019/10/21 10:22
  */
 @Configuration
-public class RabbitmqConfig {
+public class MqConfig {
 
     /**
      * 1.队列名字
@@ -29,13 +29,6 @@ public class RabbitmqConfig {
      *
      * @return queue
      */
-    @Bean
-    public Queue directQueue() {
-        String name = ConfigUtils.getProperty(RABBITMQ_NAMESPACE, AppProperties.Rabbitmq.DIRECT_QUEUE_POWER, "");
-        Assert.hasText(name, "directQueue name is empty!");
-        return new Queue(name, true, false, false);
-    }
-
     @Bean
     public Queue directQueueCreateConsumption() {
         String name = ConfigUtils.getProperty(RABBITMQ_NAMESPACE, AppProperties.Rabbitmq.DIRECT_QUEUE_CREATE_CONSUMPTION, "");
@@ -59,13 +52,6 @@ public class RabbitmqConfig {
      *
      * @return binding
      */
-    @Bean
-    public Binding bindingDirect() {
-        String key = ConfigUtils.getProperty(RABBITMQ_NAMESPACE, AppProperties.Rabbitmq.DIRECT_KEY_POWER, "");
-        Assert.hasText(key, "direct key for power is empty!");
-        return BindingBuilder.bind(directQueue()).to(directExchange()).with(key);
-    }
-
     @Bean
     public Binding bindingDirectCreateConsumption() {
         String key = ConfigUtils.getProperty(RABBITMQ_NAMESPACE, AppProperties.Rabbitmq.DIRECT_KEY_CREATE_CONSUMPTION, "");

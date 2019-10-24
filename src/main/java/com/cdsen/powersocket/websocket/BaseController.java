@@ -18,7 +18,7 @@ public class BaseController {
     }
 
     @MessageExceptionHandler
-    @SendToUser(destinations = "/queue/message", broadcast = false)
+    @SendToUser(destinations = "/queue/error", broadcast = false)
     public MessageResult handleException(Exception ex) {
         return MessageResult.of(999999999, ex.getMessage());
     }

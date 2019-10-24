@@ -1,10 +1,9 @@
 package com.cdsen.powersocket.websocket;
 
-import com.cdsen.apollo.AppProperties;
-import com.cdsen.apollo.ConfigUtils;
 import com.cdsen.powersocket.message.ConnectionError;
 import com.cdsen.powersocket.message.MessageResult;
 import com.cdsen.security.util.JwtParseUtils;
+import com.cdsen.user.SecurityConfig;
 import com.cdsen.user.UserLoginInfo;
 import com.cdsen.user.UserManager;
 import lombok.extern.slf4j.Slf4j;
@@ -40,9 +39,11 @@ import java.util.Objects;
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final UserManager userManager;
+    private final SecurityConfig securityConfig;
 
-    public WebSocketConfig(UserManager userManager) {
+    public WebSocketConfig(UserManager userManager, SecurityConfig securityConfig) {
         this.userManager = userManager;
+        this.securityConfig = securityConfig;
     }
 
     @Bean
@@ -73,8 +74,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             public Message<?> preSend(Message<?> message, MessageChannel channel) {
                 StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
                 if (Objects.nonNull(accessor) && Objects.nonNull(accessor.getCommand())) {
-                    String authorization = ConfigUtils.getProperty(AppProperties.Security.HEADER, "authorization");
-                    List<String> nativeHeader = accessor.getNativeHeader(authorization);
+                    List<String> nativeHeader = accessor.getNativeHeader(securityConfig.getHeader());
 
                     if (CollectionUtils.isEmpty(nativeHeader)) {
                         return new GenericMessage<>(MessageResult.of(ConnectionError.CAN_NOT_ACCESS));
@@ -85,8 +85,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         return new GenericMessage<>(MessageResult.of(ConnectionError.CAN_NOT_ACCESS));
                     }
 
-                    String secret = ConfigUtils.getProperty(AppProperties.Security.SECRET, "");
-                    String username = JwtParseUtils.getUsernameFromToken(secret, token);
+                    String username = JwtParseUtils.getUsernameFromToken(securityConfig.getSecret(), token);
                     if (StringUtils.isBlank(username)) {
                         return new GenericMessage<>(MessageResult.of(ConnectionError.CAN_NOT_ACCESS));
                     }
