@@ -58,4 +58,5 @@ public class RabbitSender implements RabbitTemplate.ConfirmCallback, RabbitTempl
     public Object sendMessageAndReturn(String exchangeName, String routingKey, Object message) {
         return rabbitTemplate.convertSendAndReceive(exchangeName, routingKey, message, new CorrelationData(UUID.randomUUID().toString()));
     }
+
 }

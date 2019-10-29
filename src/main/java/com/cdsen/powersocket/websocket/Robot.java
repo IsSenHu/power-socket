@@ -1,8 +1,10 @@
 package com.cdsen.powersocket.websocket;
 
 import com.cdsen.powersocket.controller.consumption.ConsumptionCommand;
+import com.cdsen.powersocket.controller.income.IncomeCommand;
 import com.cdsen.rabbit.model.ConsumptionCreateDTO;
 import com.cdsen.rabbit.model.ConsumptionItemCreateDTO;
+import com.cdsen.rabbit.model.InComeCreateDTO;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
@@ -19,11 +21,15 @@ import java.util.concurrent.ConcurrentMap;
 @Component
 public class Robot {
 
-    private static final ConcurrentMap<String, ConsumptionCreateDTO> CREATE_DTO_CONCURRENT_MAP = new ConcurrentHashMap<>();
+    /**
+     * TODO 改用redis存储
+     * */
+    private static final ConcurrentMap<String, ConsumptionCreateDTO> CONSUMPTION_CREATE_DTO_CONCURRENT_MAP = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, InComeCreateDTO> IN_COME_CREATE_DTO_CONCURRENT_MAP = new ConcurrentHashMap<>();
 
     public Pair<ConsumptionCommand, ConsumptionCreateDTO> autoConsumption(ConsumptionCommand command, String param, String userId) {
-        ConsumptionCreateDTO dto = CREATE_DTO_CONCURRENT_MAP.getOrDefault(userId, new ConsumptionCreateDTO());
-        CREATE_DTO_CONCURRENT_MAP.putIfAbsent(userId, dto);
+        ConsumptionCreateDTO dto = CONSUMPTION_CREATE_DTO_CONCURRENT_MAP.getOrDefault(userId, new ConsumptionCreateDTO());
+        CONSUMPTION_CREATE_DTO_CONCURRENT_MAP.putIfAbsent(userId, dto);
         ConsumptionCommand next = null;
         switch (command) {
             case SET_TIME: {
@@ -62,13 +68,58 @@ public class Robot {
                 next = ConsumptionCommand.SET_MONEY;
                 break;
             case CANCEL: {
-                CREATE_DTO_CONCURRENT_MAP.remove(userId);
+                CONSUMPTION_CREATE_DTO_CONCURRENT_MAP.remove(userId);
                 next = ConsumptionCommand.CANCEL;
                 break;
             }
             case FINISH: {
-                CREATE_DTO_CONCURRENT_MAP.remove(userId);
+                CONSUMPTION_CREATE_DTO_CONCURRENT_MAP.remove(userId);
                 next = ConsumptionCommand.FINISH;
+                break;
+            }
+            default:
+        }
+        return Pair.of(next, dto);
+    }
+
+    public Pair<IncomeCommand, InComeCreateDTO> autoIncome(IncomeCommand command, String param, String userId) {
+        InComeCreateDTO dto = IN_COME_CREATE_DTO_CONCURRENT_MAP.getOrDefault(userId, new InComeCreateDTO());
+        IN_COME_CREATE_DTO_CONCURRENT_MAP.putIfAbsent(userId, dto);
+        IncomeCommand next = null;
+        switch (command) {
+            case SET_INCOME: {
+                dto.setIncome(new BigDecimal(param));
+                next = IncomeCommand.SET_CURRENCY;
+                break;
+            }
+            case SET_CURRENCY: {
+                dto.setCurrency(param);
+                next = IncomeCommand.SET_DESC;
+                break;
+            }
+            case SET_DESC: {
+                dto.setDescription(param);
+                next = IncomeCommand.SET_TIME;
+                break;
+            }
+            case SET_TIME: {
+                dto.setTime(param);
+                next = IncomeCommand.SET_CHANNEL;
+                break;
+            }
+            case SET_CHANNEL: {
+                dto.setChannel(Integer.parseInt(param));
+                next = IncomeCommand.FINISH;
+                break;
+            }
+            case FINISH: {
+                IN_COME_CREATE_DTO_CONCURRENT_MAP.remove(userId);
+                next = IncomeCommand.SET_INCOME;
+                break;
+            }
+            case CANCEL: {
+                IN_COME_CREATE_DTO_CONCURRENT_MAP.remove(userId);
+                next = IncomeCommand.CANCEL;
                 break;
             }
             default:

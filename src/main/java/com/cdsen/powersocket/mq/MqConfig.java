@@ -29,9 +29,16 @@ public class MqConfig {
      *
      * @return queue
      */
-    @Bean
+    @Bean("directQueueCreateConsumption")
     public Queue directQueueCreateConsumption() {
         String name = ConfigUtils.getProperty(RABBITMQ_NAMESPACE, AppProperties.Rabbitmq.DIRECT_QUEUE_CREATE_CONSUMPTION, "");
+        Assert.hasText(name, "directQueue name is empty!");
+        return new Queue(name, true, false, false);
+    }
+
+    @Bean("directQueueCreateIncome")
+    public Queue directQueueCreateIncome() {
+        String name = ConfigUtils.getProperty(RABBITMQ_NAMESPACE, AppProperties.Rabbitmq.DIRECT_QUEUE_CREATE_INCOME, "");
         Assert.hasText(name, "directQueue name is empty!");
         return new Queue(name, true, false, false);
     }
@@ -52,11 +59,18 @@ public class MqConfig {
      *
      * @return binding
      */
-    @Bean
+    @Bean("bindingDirectCreateConsumption")
     public Binding bindingDirectCreateConsumption() {
         String key = ConfigUtils.getProperty(RABBITMQ_NAMESPACE, AppProperties.Rabbitmq.DIRECT_KEY_CREATE_CONSUMPTION, "");
         Assert.hasText(key, "direct key for power is empty!");
         return BindingBuilder.bind(directQueueCreateConsumption()).to(directExchange()).with(key);
+    }
+
+    @Bean("bindingDirectCreateIncome")
+    public Binding bindingDirectCreateIncome() {
+        String key = ConfigUtils.getProperty(RABBITMQ_NAMESPACE, AppProperties.Rabbitmq.DIRECT_KEY_CREATE_INCOME, "");
+        Assert.hasText(key, "direct key for power is empty!");
+        return BindingBuilder.bind(directQueueCreateIncome()).to(directExchange()).with(key);
     }
 
     @Bean
